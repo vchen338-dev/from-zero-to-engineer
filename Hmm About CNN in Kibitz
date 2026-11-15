@@ -1,0 +1,45 @@
+What I Learned About CNNs From My Chess Analyzer
+
+When I started building my chess analyzer, I thought the hard part would be the chess rules. It wasn’t. 
+The hard part was figuring out how to show a chessboard to a neural network, and why a CNN works better 
+for that than a regular fully connected network.
+
+Why a CNN?
+
+A chessboard is an 8×8 grid, so it works a lot like a tiny image. CNNs are designed for data like this,
+where the position of things matters. A knight on f3 means something different with pawns next to it than when it’s alone. 
+A CNN looks at small regions of the board at a time, so it can pick up on those local patterns.
+
+Another advantage is that the same filter is applied across the whole board, so the network doesn’t have 
+to relearn the same pattern for every square. This also means fewer weights to train, 
+which makes overfitting less likely.
+
+How I Put the Board Into the Model
+
+This was the biggest lesson for me. A neural network can’t read a FEN string, so I had to convert the board into numbers.
+I used an 8×8×12 input, with one channel for each piece type and color. A 1 means that piece is on that square, and a 0 means it isn’t.
+
+I used to think “channels” only meant colors, like red, green, and blue in a picture. 
+Now I understand that a channel can be any information you want the model to see. You could add one for whose turn it is,
+or for castling rights.
+
+What Each Part Does
+Convolution layers: find patterns in the position. Early layers detect simple features, and deeper layers detect bigger ideas.
+Padding: matters a lot on a small board. Without it, the edges and corners get lost quickly.
+ReLU: adds non-linearity, so the model can learn complex relationships instead of only straight-line ones.
+Pooling: didn’t help much here. In chess, the exact square matters, so shrinking the board can throw away useful information.
+Final layers: turn all the features into a single score for the position.
+Problems I Ran Into
+Imbalanced data. Most positions were close to equal, so the model became biased toward them.
+Overfitting. The model did well on training data but poorly on new positions. Using a validation set and more data helped.
+Tactics. A CNN is good at recognizing patterns but bad at calculating ahead. A tactic that is three moves deep is hard for it to see.
+Choosing what to predict. Predicting the engine score, the game result, or the next move each teaches the model something different, so this choice matters.
+Main Takeaways
+Good data and a good input format matter more than a bigger model.
+A CNN can’t replace search. Real chess engines combine a neural network with search. My CNN is more like intuition, and search is the calculation.
+High accuracy isn’t enough. I have to test on positions the model has never seen and compare it against an engine like Stockfish.
+Building it taught me more than reading about it. I understood convolutions and filters much better after debugging my own model.
+Final Thoughts
+
+My chess analyzer showed me that machine learning isn’t just about picking a model. It’s about understanding the problem, preparing the data well, 
+and knowing what the model can and can’t do. If I keep working on this, I want to try combining the CNN with a search algorithm so it can handle tactics better.
